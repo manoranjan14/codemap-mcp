@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.pytest_cache/
+
+# Guard against re-leaking employer identifiers into a repo intended for
+# publication - see the note at the top of docs/DESIGN.md. Nothing here is
+# generated; this is a reminder that new prose must use neutral names.
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Local publishing credentials. .env holds a live PyPI API token; it must
+# never reach a commit, least of all one that gets mirrored to the public
+# repo. .env.example is the committed template and holds no secret.
+.env
+.env.*
+!.env.example

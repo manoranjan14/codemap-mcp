@@ -1,0 +1,104 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # The full suite, with the OPTIONAL tree-sitter dependency installed, so
+  # the TypeScript/JavaScript/Vue tests actually execute rather than skip.
+  # requirements.txt picks the grammar pack by Python version:
+  # tree_sitter_languages on <=3.12 (abandoned, but the better TS grammar),
+  # tree-sitter-language-pack on 3.13+ (the only one that installs there).
+  # 3.13 is in this matrix specifically to exercise that second backend.
+  full:
+    name: full suite (py${{ matrix.python-version }}, tree-sitter)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install the package with all extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]"
+
+      - name: Assert tree-sitter really loaded
+        # Without this, a broken/missing wheel would silently turn every
+        # TS test into a skip and the job would still be green. Printing the
+        # backend also makes it visible which pack each Python version
+        # actually resolved to.
+        run: |
+          python -c "
+          import sys; from codegraph import ts_parser
+          assert ts_parser.available(), ts_parser.unavailable_reason()
+          print('tree-sitter OK via', ts_parser.backend())
+          "
+
+      - name: Run tests
+        run: python -m pytest -rs
+
+  # The degraded path: no tree-sitter at all. Python indexing must work in
+  # full, TS files must be skipped with a warning rather than failing the
+  # run, and the TS tests must skip cleanly instead of erroring. 3.13 is in
+  # this matrix on purpose - the pinned tree-sitter has no wheel for it, so
+  # this is the real-world "can't install the optional dep" case.
+  python-only:
+    name: no tree-sitter (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the package with NO extras
+        # Proves the core install pulls zero third-party code: the indexer
+        # and query layer are stdlib-only, and that is worth testing rather
+        # than asserting in a README.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . "pytest>=7.0"
+          python - <<'EOF'
+          import importlib.metadata as md
+          # Assert on what the PACKAGE declares, not on what happens to be
+          # in the venv - pytest drags in its own dependencies (Pygments and
+          # friends) and an allowlist of those would rot on every release.
+          reqs = md.requires("codemap-mcp") or []
+          core = [r for r in reqs if "extra ==" not in r]
+          assert not core, f"core install declares third-party deps: {core}"
+          import codegraph.graph_lib, codegraph.query_lib, codegraph.cg_index
+          print("core install is stdlib-only:", len(reqs), "requirements, all behind extras")
+          EOF
+
+      - name: Assert tree-sitter is absent
+        run: |
+          python -c "
+          import sys; from codegraph import ts_parser
+          assert not ts_parser.available(), 'expected tree-sitter to be missing here'
+          print('degraded path confirmed:', ts_parser.unavailable_reason())
+          "
+
+      - name: Indexing a Python repo must still work with zero third-party deps
+        run: |
+          codemap-index tests/edge_repo --db /tmp/ci.db
+          codemap-query --db /tmp/ci.db neighbors Worker.dispatch
+
+      - name: Run tests
+        run: python -m pytest -rs

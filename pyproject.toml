@@ -1,0 +1,91 @@
+[build-system]
+# Pinned to the 1.27 line deliberately. Newer hatchling emits
+# `Metadata-Version: 2.5`, which PyPI's upload validator does not accept
+# yet - the only symptom is a bare `400 Bad Request` from twine with no
+# explanation, and `twine check` passes on the rejected artifact because it
+# validates README rendering, not metadata policy. 1.27 is the earliest
+# version that emits 2.4 WITH PEP 639 `License-Expression`, which is what
+# PyPI wants today. Relax this once PyPI accepts 2.5.
+requires = ["hatchling>=1.27,<1.28"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codemap-mcp"
+version = "0.2.0"
+description = "A local, queryable map of your codebase for Claude Code: import-aware call graph, durable session memory, and session-history search, exposed as MCP tools."
+readme = "README.md"
+# PEP 639: an SPDX expression, not the legacy free-text field. With
+# Metadata-Version 2.4+ PyPI rejects `license = { file = ... }` (which
+# dumps the whole licence text into a deprecated `License:` header) and
+# also rejects the old `License :: OSI Approved ::` classifiers alongside
+# it. `twine check` does NOT catch this - it validates README rendering,
+# not PyPI's metadata policy - so the only symptom is a bare 400 on upload.
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+# GitHub's noreply address rather than a personal or work one: this is a
+# public index page, and the project is deliberately not associated with
+# any employer. Change it if you want a contactable address.
+authors = [{ name = "manoranjan14", email = "manoranjan14@users.noreply.github.com" }]
+maintainers = [{ name = "manoranjan14", email = "manoranjan14@users.noreply.github.com" }]
+keywords = ["mcp", "claude", "code-graph", "call-graph", "static-analysis", "typescript", "vue"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# Deliberately EMPTY. The indexer and the query layer use nothing but the
+# standard library - `ast`, `sqlite3` - and that is a property worth
+# keeping provable rather than a happy accident. Everything heavier is an
+# extra, so `pip install codemap-mcp` gives a working Python indexer with
+# no third-party code at all.
+dependencies = []
+
+[project.optional-dependencies]
+# The MCP server only. Both the 1.x and 2.x SDKs are supported (the server
+# class was renamed FastMCP -> MCPServer in 2.0).
+server = ["mcp>=1.0.0"]
+
+# TypeScript / JavaScript / Vue parsing. Split by Python version because
+# neither grammar pack covers all of them and they pin incompatible
+# `tree-sitter` releases: tree_sitter_languages is abandoned and has no
+# wheels past cp312, but is MEASURABLY the better TypeScript grammar (see
+# docs/DESIGN.md - the newer pack fixes 3 files on a real repo and breaks
+# 8). Without this extra, .ts/.tsx/.js/.jsx/.vue files are skipped with a
+# warning and Python still indexes in full.
+ts = [
+    "tree-sitter==0.21.3; python_version < '3.13'",
+    "tree_sitter_languages==1.10.2; python_version < '3.13'",
+    "tree-sitter-language-pack>=0.9; python_version >= '3.13'",
+]
+
+all = ["codemap-mcp[server,ts]"]
+dev = ["codemap-mcp[server,ts]", "pytest>=7.0"]
+
+[project.scripts]
+codemap-mcp = "codegraph.cg_mcp_server:main"
+codemap-index = "codegraph.cg_index:main"
+codemap-query = "codegraph.cg_query:main"
+codemap-usage = "codegraph.cg_usage:main"
+
+[project.urls]
+Homepage = "https://github.com/manoranjan14/codemap-mcp"
+Documentation = "https://github.com/manoranjan14/codemap-mcp/blob/main/docs/DESIGN.md"
+Issues = "https://github.com/manoranjan14/codemap-mcp/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/codegraph"]
+
+[tool.hatch.build.targets.wheel.shared-scripts]
+# The two hook helpers are shell, not Python, and must land somewhere a
+# settings.json hook can name. Installed alongside the console scripts.
+"src/codegraph/cg_reindex_if_opted_in.sh" = "codemap-reindex-if-opted-in"
+"src/codegraph/cg_log_builtin_tool.sh" = "codemap-log-builtin-tool"
+
+[tool.hatch.build.targets.sdist]
+include = ["src/codegraph", "tests", "docs", "README.md", "LICENSE", "pyproject.toml", "pytest.ini"]

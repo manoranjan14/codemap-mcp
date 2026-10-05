@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="286" viewBox="0 0 720 286" font-family="SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace">
+<rect x="0" y="0" width="720" height="286" rx="10" fill="#0f172a"/>
+<rect x="0" y="0" width="720" height="32" rx="10" fill="#1e293b"/>
+<rect x="0" y="16" width="720" height="16" fill="#1e293b"/>
+<circle cx="20" cy="16" r="6" fill="#ff5f56"/>
+<circle cx="38" cy="16" r="6" fill="#ffbd2e"/>
+<circle cx="56" cy="16" r="6" fill="#27c93f"/>
+<text x="360.0" y="21" font-size="12" fill="#94a3b8" text-anchor="middle">zsh — codegraph demo</text>
+<clipPath id="clip0"><rect x="0" y="32" height="22"><animate attributeName="width" values="0;0;266.8;266.8;0" keyTimes="0;0.0000;0.0344;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="46" font-size="14" fill="#7dd3fc" clip-path="url(#clip0)">$ codegraph-index ./my-repo</text>
+<clipPath id="clip1"><rect x="0" y="54" height="22"><animate attributeName="width" values="0;0;182.8;182.8;0" keyTimes="0;0.0719;0.1062;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="68" font-size="14" fill="#e5e7eb" clip-path="url(#clip1)">Indexed ./my-repo</text>
+<clipPath id="clip2"><rect x="0" y="76" height="22"><animate attributeName="width" values="0;0;401.2;401.2;0" keyTimes="0;0.1437;0.1781;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="90" font-size="14" fill="#9ca3af" clip-path="url(#clip2)">  files: 12 total, 12 (re)parsed, 0 removed</text>
+<clipPath id="clip3"><rect x="0" y="98" height="22"><animate attributeName="width" values="0;0;443.2;443.2;0" keyTimes="0;0.2156;0.2500;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="112" font-size="14" fill="#9ca3af" clip-path="url(#clip3)">  calls: 16 resolved (5 via self/type inference)</text>
+<clipPath id="clip4"><rect x="0" y="120" height="22"><animate attributeName="width" values="0;0;266.8;266.8;0" keyTimes="0;0.2875;0.3219;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="134" font-size="14" fill="#9ca3af" clip-path="url(#clip4)">  graph: 48 nodes, 59 edges</text>
+<clipPath id="clip6"><rect x="0" y="164" height="22"><animate attributeName="width" values="0;0;485.2;485.2;0" keyTimes="0;0.4312;0.4656;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="178" font-size="14" fill="#7dd3fc" clip-path="url(#clip6)">$ # ask Claude Code: "what calls Worker.run, and what</text>
+<clipPath id="clip7"><rect x="0" y="186" height="22"><animate attributeName="width" values="0;0;266.8;266.8;0" keyTimes="0;0.5031;0.5375;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="200" font-size="14" fill="#7dd3fc" clip-path="url(#clip7)">$ # breaks if I change it?"</text>
+<clipPath id="clip8"><rect x="0" y="208" height="22"><animate attributeName="width" values="0;0;426.4;426.4;0" keyTimes="0;0.5750;0.6094;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="222" font-size="14" fill="#86efac" clip-path="url(#clip8)">→ neighbors("Worker", "in")     1 caller found</text>
+<clipPath id="clip9"><rect x="0" y="230" height="22"><animate attributeName="width" values="0;0;577.6;577.6;0" keyTimes="0;0.6469;0.6813;0.9000;1" dur="16.0s" repeatCount="indefinite" calcMode="linear"/></rect></clipPath>
+<text x="20" y="244" font-size="14" fill="#86efac" clip-path="url(#clip9)">→ impacted_by("Worker")          reverse-reachability, repo-wide</text>
+<rect x="567.6" y="230" width="8" height="16" fill="#e5e7eb"><animate attributeName="opacity" values="0;0;1;0;1;0;1;0;1;0;1;0;0;0" keyTimes="0.0000;0.6813;0.7031;0.7250;0.7469;0.7687;0.7906;0.8125;0.8344;0.8562;0.8781;0.9000;0.9000;1.0000" dur="16.0s" repeatCount="indefinite"/></rect>
+</svg>
